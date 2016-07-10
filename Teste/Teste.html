@@ -1,0 +1,154 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <script src="scripts/jquery-3.0.0.min.js"></script>
+    <title>Otimizando o carregamento de imagens</title>
+    <meta charset="utf-8" />
+    <script type="text/javascript">
+        var _imgCarregando = new Image();
+        var _arrayUrls = new Array();
+
+        $(document).ready(function () {
+            $("#inp-select-img").change(function (data) {
+                $("#inp-select-img").html("");
+
+                var countLocal = _arrayUrls.length;
+                var indiceControle = _arrayUrls.length;
+                $.each(data.target.files, function (indice, obj) {
+                    _arrayUrls.push({ "indice": countLocal, "url": obj, "type": obj.type });
+                    countLocal += 1;
+                });
+
+                carregarArquivo(_arrayUrls[indiceControle]);
+            });
+
+            $("#div-imgs").on("click", ".img-editar", function () {
+                $("#div-edicao canvas").remove();
+                $("#div-imgs").addClass("ocultar");
+                var id = $(this).attr("id");
+                $("#div-edicao").removeClass("ocultar");
+                var arq = $.grep(_arrayUrls, function (obj) {
+                    return obj.indice == id;
+                })[0];
+
+                var url = window.URL.createObjectURL(arq.url);
+                _imgCarregando.onload = function () {
+                    var altura = this.height;
+                    var largura = this.width;
+
+                    var alturaDesenho = $("#div-edicao").height() * 0.9;
+                    var larguraDesenho = largura * alturaDesenho / altura;
+
+                    if (larguraDesenho > $("#div-edicao").width() * 0.9) {
+                        larguraDesenho = $("#div-edicao").width() * 0.9;
+                        alturaDesenho = altura * larguraDesenho / largura;
+                    }
+
+                    var canvas = document.createElement("canvas");
+                    canvas.width = larguraDesenho;
+                    canvas.height = alturaDesenho;
+                    var ctx = canvas.getContext("2d");
+                    ctx.drawImage(this, 0, 0, canvas.width, canvas.height);
+                    $("#div-edicao").append(canvas);
+
+                    window.URL.revokeObjectURL(url);
+                };
+
+                _imgCarregando.src = url;
+            });
+
+            $("#btn-fechar").click(function () {
+                $("#div-edicao canvas").remove();
+                $("#div-edicao").addClass("ocultar");
+                $("#div-imgs").removeClass("ocultar");
+            });
+
+        });
+
+        function carregarArquivo(obj) {
+            if (obj) {
+                if (obj.type.match('image.*')) {
+                    var url = window.URL.createObjectURL(obj.url);
+                    _imgCarregando.onload = function () {
+                        //Load img - teste
+                        //$("#div-imgs").append("<img height='150' id=" + obj.indice + " src=''/>");
+                        //$("#" + obj.indice).attr("src", url);
+
+                        //Draw canvas
+                        var canvas = document.createElement("canvas");
+                        canvas.height = 150;
+                        canvas.width = this.width * canvas.height / this.height;
+                        var ctx = canvas.getContext("2d");
+                        ctx.drawImage(this, 0, 0, canvas.width, canvas.height);
+
+                        $("#div-imgs").append("<img height='150' class='img-editar' id=" + obj.indice + " src=''/>");
+                        var arqFinal = canvas.toDataURL(obj.type, 1);
+                        $("#" + obj.indice).attr("src", arqFinal);
+
+                        window.URL.revokeObjectURL(url);
+                        $('html, body').prop("scrollTop", $("#div-imgs").height());
+
+                        carregarArquivo($.grep(_arrayUrls, function (objAbrir) { return objAbrir.indice == obj.indice + 1; })[0]);
+                    };
+                    _imgCarregando.src = url;
+                }
+            } else
+                _imgCarregando = new Image();
+        }
+    </script>
+    <style>
+        .position-absolute {
+            position: absolute;
+        }
+
+        .ocultar {
+            display: none;
+        }
+
+        .img-editar {
+            margin-bottom: 5px;
+            margin-right: 5px;
+        }
+
+            .img-editar:hover {
+                cursor: pointer;
+            }
+
+        #div-edicao {
+            width: 100%;
+            height: 100%;
+            background: #FFF;
+        }
+
+        html, body, #div-conteudo {
+            height: 100%;
+            width: 100%;
+        }
+
+        #div-conteudo {
+            height: 85%;
+            position: relative;
+        }
+
+        #btn-fechar {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h2>Otimizando o carregamento de imagens</h2>
+    <h4>createObjectURL e Canvas</h4>
+    <p>Aplicações de carreamento de imagens em grande quantidade, normalmente são custosos aos navegadores. Além de alguns navegadores demorarem a liberar a memória utilizada nesse load inicial, existem outros fatores que podem ser os grandes vilões para a sobrecarga de memória.</p>
+    <p>Este exemplo utiliza: createObjectURL e Canvas. Os testes foram bem sucedidos em quase todos os navegadores. No FF existe um tempo para liberação da memória que não tem ligação com o revokeObjectURL, mas, sim, com a renderização de grandes quantidades de imagens, ou imagens grandes, em um curto intervalo de tempo.</p>
+    <p>Verifique que, apenas a utilização do createObjectURL não é o suficiente para uma considerável melhoria no carregamento. No método carregarArquivo é possível encontrar o código de load da imagem comentado. Foi necessária a geração do canvas e obtenção da string em base 64 para otimização do uso da memória.</p>
+    <input type="file" id="inp-select-img" multiple="multiple" />    
+    <div id="div-conteudo">
+        <div class="position-absolute" id="div-imgs">
+        </div>
+
+        <div class="position-absolute ocultar" id="div-edicao">
+            <input type="button" value="Fechar" id="btn-fechar" />
+        </div>
+    </div>
+</body>
+</html>
