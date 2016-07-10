@@ -137,10 +137,6 @@
 </head>
 <body>
     <h2>Otimizando o carregamento de imagens na web</h2>
-    <h4>createObjectURL e Canvas</h4>
-    <p>Aplicações de carreamento de imagens em grande quantidade, normalmente são custosos aos navegadores. Além de alguns navegadores demorarem a liberar a memória utilizada nesse load inicial, existem outros fatores que podem ser os grandes vilões para a sobrecarga de memória.</p>
-    <p>Este exemplo utiliza: createObjectURL e Canvas. Os testes foram bem sucedidos em quase todos os navegadores. No FF existe um tempo para liberação da memória que não tem ligação com o revokeObjectURL, mas, sim, com a renderização de grandes quantidades de imagens, ou imagens grandes, em um curto intervalo de tempo.</p>
-    <p>Verifique que, apenas a utilização do createObjectURL não é o suficiente para uma considerável melhoria no carregamento. No método carregarArquivo é possível encontrar o código de load da imagem comentado. Foi necessária a geração do canvas e obtenção da string em base 64 para otimização do uso da memória.</p>
     <input type="file" id="inp-select-img" multiple="multiple" />    
     <div id="div-conteudo">
         <div class="position-absolute" id="div-imgs">
