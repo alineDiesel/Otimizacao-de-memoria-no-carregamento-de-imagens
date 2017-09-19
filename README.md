@@ -8,3 +8,5 @@ Nem todos os problemas foram sanados utilizando este método, é possível visua
 do carregamento de imagens em grande número ou muito grandes. Mesmo através do controle global do carregamento das imagens - objeto Image, e que sejam carregadas uma a uma, o navegador FF sofre na renderização e não no carregamento ou liberação da memória através do revokeObjectURL.
 Uma solução testada para este problema mas, duvidosa, é a verificação do navegador e adição do timeout para a continuação do carregamento. Não é seguro e nem indicado, mas foi o mais próximo de uma solução e redução do uso de memória. 
 
+
+Humm...
